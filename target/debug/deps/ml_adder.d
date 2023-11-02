@@ -1,6 +1,7 @@
-G:\My Drive\dev\ml_adder\target\debug\deps\ml_adder.exe: src\main.rs src\matrix.rs
+C:\dev\ml_adder\target\debug\deps\ml_adder.exe: src\main.rs src\matrix.rs src\nn.rs
 
-G:\My Drive\dev\ml_adder\target\debug\deps\ml_adder.d: src\main.rs src\matrix.rs
+C:\dev\ml_adder\target\debug\deps\ml_adder.d: src\main.rs src\matrix.rs src\nn.rs
 
 src\main.rs:
 src\matrix.rs:
+src\nn.rs:

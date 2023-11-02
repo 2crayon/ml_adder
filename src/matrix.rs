@@ -1,3 +1,4 @@
+use crate::nn;
 use std::{
     fmt,
     ops::{Index, IndexMut},
@@ -19,6 +20,23 @@ impl Matrix {
         }
     }
 
+    pub fn from_slice(slice: &[&[f32]]) -> Self {
+        let row_count = slice.len();
+        let col_count = slice[0].len();
+
+        let mut data = Vec::with_capacity(row_count * col_count);
+        for row in slice {
+            assert_eq!(row.len(), col_count);
+            data.extend_from_slice(row);
+        }
+
+        Matrix {
+            data,
+            row_count,
+            col_count,
+        }
+    }
+
     pub fn fill(&mut self, value: f32) {
         for i in 0..self.data.len() {
             self.data[i] = value;
@@ -29,6 +47,14 @@ impl Matrix {
         for i in 0..self.data.len() {
             self.data[i] = rand::random::<f32>() * (high - low) + low;
         }
+    }
+
+    pub fn row_count(&self) -> usize {
+        self.row_count
+    }
+
+    pub fn col_count(&self) -> usize {
+        self.col_count
     }
 
     pub fn add(&self, other: &Self) -> Self {
@@ -46,7 +72,31 @@ impl Matrix {
 
     pub fn dot(&self, other: &Self) -> Self {
         assert_eq!(self.col_count, other.row_count);
-        todo!()
+        let inner = self.col_count;
+        let outer = (self.row_count, other.col_count);
+
+        let mut result = Matrix::new(outer.0, outer.1);
+        result.fill(0.0);
+
+        for i in 0..outer.0 {
+            for j in 0..outer.1 {
+                for k in 0..inner {
+                    result[i][j] += self[i][k] * other[k][j]
+                }
+            }
+        }
+
+        result
+    }
+
+    pub fn sigmoid(&self) -> Self {
+        let mut result = Matrix::new(self.row_count, self.col_count);
+
+        for i in 0..self.data.len() {
+            result.data[i] = nn::sigmoid(self.data[i]);
+        }
+
+        result
     }
 }
 
