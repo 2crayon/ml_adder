@@ -13,9 +13,16 @@ fn main() {
     let t_in = Matrix::from_slice(&[&[0.0, 0.0], &[0.0, 1.0], &[1.0, 0.0], &[1.0, 1.0]]);
     let t_out = Matrix::from_slice(&[&[0.0], &[1.0], &[1.0], &[0.0]]);
 
-    println!("cost = {}", nn::cost(&m, t_in, t_out));
-    println!("{}", SEP);
+    const EPS: f32 = 0.1;
+    const RATE: f32 = 0.1;
 
+    for i in 0..10000 {
+        println!("{}: cost = {}", i, nn::cost(&m, &t_in, &t_out));
+        let grad = nn::finite_diff(&m, &t_in, &t_out, EPS);
+        m = nn::learn(&m, &grad, RATE);
+    }
+
+    println!("{}", SEP);
     for i in 0..2 {
         for j in 0..2 {
             let mut a0 = Matrix::new(1, 2);

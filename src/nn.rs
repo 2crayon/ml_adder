@@ -4,6 +4,7 @@ pub fn sigmoid(x: f32) -> f32 {
     1.0 / (1.0 + (-x).exp())
 }
 
+#[derive(Clone, Debug)]
 pub struct ModelParams {
     pub w1: Matrix,
     pub b1: Matrix,
@@ -37,7 +38,7 @@ pub fn forward(m: &ModelParams, a0: &Matrix) -> f32 {
     a2[0][0]
 }
 
-pub fn cost(m: &ModelParams, t_in: Matrix, t_out: Matrix) -> f32 {
+pub fn cost(m: &ModelParams, t_in: &Matrix, t_out: &Matrix) -> f32 {
     let output_neurons_count = m.w2.col_count();
     assert_eq!(t_in.row_count(), t_out.row_count());
     assert_eq!(t_out.col_count(), output_neurons_count);
@@ -59,4 +60,70 @@ pub fn cost(m: &ModelParams, t_in: Matrix, t_out: Matrix) -> f32 {
     }
 
     cost / (sample_count as f32)
+}
+
+pub fn finite_diff(m: &ModelParams, t_in: &Matrix, t_out: &Matrix, eps: f32) -> ModelParams {
+    let c = cost(m, t_in, t_out);
+    let mut grad = ModelParams::new();
+
+    for i in 0..m.w1.row_count() {
+        for j in 0..m.w1.col_count() {
+            let mut nudge = m.clone();
+            nudge.w1[i][j] += eps;
+            grad.w1[i][j] = (cost(&nudge, t_in, t_out) - c) / eps;
+        }
+    }
+    for i in 0..m.b1.row_count() {
+        for j in 0..m.b1.col_count() {
+            let mut nudge = m.clone();
+            nudge.b1[i][j] += eps;
+            grad.b1[i][j] = (cost(&nudge, t_in, t_out) - c) / eps;
+        }
+    }
+    for i in 0..m.w2.row_count() {
+        for j in 0..m.w2.col_count() {
+            let mut nudge = m.clone();
+            nudge.w2[i][j] += eps;
+            grad.w2[i][j] = (cost(&nudge, t_in, t_out) - c) / eps;
+        }
+    }
+    for i in 0..m.b2.row_count() {
+        for j in 0..m.b2.col_count() {
+            let mut nudge = m.clone();
+            nudge.b2[i][j] += eps;
+            grad.b2[i][j] = (cost(&nudge, t_in, t_out) - c) / eps;
+        }
+    }
+
+    grad
+}
+
+pub fn learn(m: &ModelParams, grad: &ModelParams, rate: f32) -> ModelParams {
+    let mut result = m.clone();
+
+    for i in 0..m.w1.row_count() {
+        for j in 0..m.w1.col_count() {
+            result.w1[i][j] -= grad.w1[i][j] * rate;
+        }
+    }
+
+    for i in 0..m.b1.row_count() {
+        for j in 0..m.b1.col_count() {
+            result.b1[i][j] -= grad.b1[i][j] * rate;
+        }
+    }
+
+    for i in 0..m.w2.row_count() {
+        for j in 0..m.w2.col_count() {
+            result.w2[i][j] -= grad.w2[i][j] * rate;
+        }
+    }
+
+    for i in 0..m.b2.row_count() {
+        for j in 0..m.b2.col_count() {
+            result.b2[i][j] -= grad.b2[i][j] * rate;
+        }
+    }
+
+    result
 }
