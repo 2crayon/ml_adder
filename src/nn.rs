@@ -37,14 +37,6 @@ impl ModelParams {
         }
     }
 
-    pub fn weights(&self) -> &[Matrix] {
-        &self.w
-    }
-
-    pub fn biases(&self) -> &[Matrix] {
-        &self.b
-    }
-
     pub fn structure(&self) -> Vec<usize> {
         // i don't get this
 
@@ -87,13 +79,12 @@ pub fn cost(m: &ModelParams, train_in: &[&[f32]], train_out: &[&[f32]]) -> f32 {
     assert_eq!(train_in.len(), train_out.len());
     assert_eq!(train_out[0].len(), output_neurons_count);
 
-    let sample_count = train_in.len();
+    let samples_count = train_in.len();
 
     let mut cost = 0.0;
-    for i in 0..sample_count {
+    for i in 0..samples_count {
         let x = train_in[i];
         let y = train_out[i];
-
         let guessed_y = forward(m, x);
 
         for j in 0..output_neurons_count {
@@ -102,7 +93,7 @@ pub fn cost(m: &ModelParams, train_in: &[&[f32]], train_out: &[&[f32]]) -> f32 {
         }
     }
 
-    cost / (sample_count as f32)
+    cost / (samples_count as f32)
 }
 
 pub fn finite_diff(
